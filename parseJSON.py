@@ -1,5 +1,6 @@
 import json
 import math
+import os
 from collections import OrderedDict
 from collections import defaultdict
 import ipdb
@@ -17,8 +18,8 @@ _LABEL_X = "Frequency"
 _LABEL_Y = "Words"
 _MAX_LABEL_LENGTH = 20
 
-def plot_chart(data, title):
-    _TITLE = "CF1 " + title
+def plot_chart(data, folder, title):
+    _TITLE = folder + " " + title
     labels_raw = []
     values_raw = []
     for (word, freq) in data:
@@ -65,7 +66,7 @@ def plot_chart(data, title):
     sns.despine(f,ax,top=True,right=True,left=True,bottom=True)
 
     # Save output
-    f.savefig("CF1/CF1"+title+".png")  
+    f.savefig(folder +"/"+ title +".png")  
 
 ############ IMPORT DATA AND START PROCESSING ##############
 with open("1.json") as raw:
@@ -106,27 +107,32 @@ for desc_a in descs_ask:
 
 
 # NLP related stuff from here on down
-costfunIdx_toLoad = '1'
 import spacy
 from collections import defaultdict, Counter
 nlp = spacy.load('en')
-# create doc by joining each sentence with white space
-doc = nlp(' '.join(desc_show_dict[costfunIdx_toLoad]))
 
-pos_counts = defaultdict(Counter)
-for token in doc:
-    pos_counts[token.pos][token.orth] += 1
+costfunIdxList = ['0','1','2','3','4','5','6','7','8']
+for costfunIdx_toLoad in costfunIdxList:
 
-for pos_id, counts in sorted(pos_counts.items()):
-    pos = doc.vocab.strings[pos_id]
-    data = []
-    for orth_id, count in counts.most_common():
-        print(pos, count, doc.vocab.strings[orth_id])
-        data.append( (doc.vocab.strings[orth_id], count) )
-    title = pos
-    plot_chart(data,title)    
-    #sns.plt.show()
-    #ipdb.set_trace()
+    # create doc by joining each sentence with white space
+    doc = nlp(' '.join(desc_show_dict[costfunIdx_toLoad]))
+
+    pos_counts = defaultdict(Counter)
+    for token in doc:
+        pos_counts[token.pos][token.orth] += 1
+
+    for pos_id, counts in sorted(pos_counts.items()):
+        pos = doc.vocab.strings[pos_id]
+        data = []
+        for orth_id, count in counts.most_common():
+            print(pos, count, doc.vocab.strings[orth_id])
+            data.append( (doc.vocab.strings[orth_id], count) )
+        folder = "CF"+costfunIdx_toLoad
+        os.system("mkdir ./"+folder )
+        title = pos
+        plot_chart(data,folder,title)    
+        #sns.plt.show()
+        #ipdb.set_trace()
     
 
 

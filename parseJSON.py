@@ -1,4 +1,5 @@
 import json
+import math
 from collections import OrderedDict
 from collections import defaultdict
 import ipdb
@@ -11,13 +12,13 @@ import matplotlib.pyplot as plt
 _ROTATION_DEGREES = 40 
 _BOTTOM_MARGIN = 0.35
 _COLOR_THEME = 'Blues_d'
-_COLOR_RES = 10 
+_COLOR_RES = 100 
 _LABEL_X = "Frequency"
 _LABEL_Y = "Words"
-_TITLE = "Cost Function 1"
 _MAX_LABEL_LENGTH = 20
 
-def plot_chart(data):
+def plot_chart(data, title):
+    _TITLE = "CF1 " + title
     labels_raw = []
     values_raw = []
     for (word, freq) in data:
@@ -32,15 +33,15 @@ def plot_chart(data):
     #pal = ['gray' if (x < .3*max(values)) else 'pink' if (x < .6*max(values)) else 'red' for x in values ] 
     #===== Value scaling (scales across a particular default palette)
     defPal = sns.color_palette(_COLOR_THEME, _COLOR_RES) 
-    inds = [int(v) for v in values*_COLOR_RES/max(values)]
-    inds = [_COLOR_RES - i for i in inds] 
-    pal = [defPal[i] for i in inds]        
+    inds = [int(v) for v in (_COLOR_RES*values)/max(values)]
+    inds = [_COLOR_RES - i1 for i1 in inds] 
+    pal = [defPal[i2] for i2 in inds]        
 
     # Create a plot
     sns.set(style="white", context="talk")
     (f, ax) = plt.subplots(1)
 
-    bar_chart = sns.barplot(
+    sns_bar = sns.barplot(
         x=values,
         y=labels,
         palette=pal
@@ -58,9 +59,13 @@ def plot_chart(data):
     #plt.subplots_adjust(bottom=_BOTTOM_MARGIN)
 
     # Stylistic
-    # remove borders
+    # remove bar borders
     plt.setp(ax.patches, linewidth=0)
+    # remove axis spines
     sns.despine(f,ax,top=True,right=True,left=True,bottom=True)
+
+    # Save output
+    f.savefig("CF1/CF1"+title+".png")  
 
 ############ IMPORT DATA AND START PROCESSING ##############
 with open("1.json") as raw:
@@ -118,10 +123,11 @@ for pos_id, counts in sorted(pos_counts.items()):
     for orth_id, count in counts.most_common():
         print(pos, count, doc.vocab.strings[orth_id])
         data.append( (doc.vocab.strings[orth_id], count) )
-    plot_chart(data)    
-    sns.plt.show()
-    ipdb.set_trace()
-
+    title = pos
+    plot_chart(data,title)    
+    #sns.plt.show()
+    #ipdb.set_trace()
+    
 
 
 
